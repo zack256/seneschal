@@ -1,3 +1,24 @@
+class Graph {
+    constructor (title, positions) {
+        this.title = title;
+        this.positions = positions;
+    }
+    getEarliestStart () {
+        let m = Infinity;
+        for (var i = 0; i < this.positions.length; i++) {
+            m = Math.min(m, this.positions[i].holders[0].start);
+        }
+        return m;
+    }
+    getLatestEnd () {
+        let M = -Infinity;
+        for (var i = 0; i < this.positions.length; i++) {
+            M = Math.max(M, this.positions[i].holders[this.positions[i].holders.length - 1].end);
+        }
+        return M;
+    }
+}
+
 class Position {
     constructor (title, holders, color) {
         this.title = title;
@@ -6,12 +27,17 @@ class Position {
     }
 }
 
-function getStart (holders) {
-    return holders[0][1];
+class Holder {
+    constructor (name, start, end) {
+        this.name = name;
+        this.start = start;
+        this.end = end;
+    }
+    getLength () {
+        return this.end - this.start;
+    }
 }
-function getEnd (holders) {
-    return holders[holders.length - 1][2];
-}
+
 function getMarginTotal (row) {
     let marginLeft = parseFloat($(row).children().eq(0).css("marginLeft"));
     let marginRight = parseFloat($(row).children().eq(0).css("marginRight"));
@@ -25,42 +51,36 @@ function getPaddingTotal (row) {
     return paddingTotal;
 }
 
-function initRow (position, graphParent) {
+function initRow (position, graphParent, start, end, maxStretch) {
     let row = document.createElement("DIV");
     row.classList.add("SNrow");
     graphParent.appendChild(row);
     var reign;
-    let start = getStart(position.holders);
-    let end = getEnd(position.holders);
-    let stretch = end - start;
-    var widthDecimal, widthString;
     for (var i = 0; i < position.holders.length; i++) {
         reign = document.createElement("DIV");
-        reign.classList.add("SNreign");
+        reign.classList.add("SNholder");
         row.appendChild(reign);
         reign.style.backgroundColor = position.color;
-        reign.innerHTML = position.holders[i][0];
-    }
+        reign.innerHTML = position.holders[i].name;
 
-    let marginTotal = getMarginTotal(row);
-    let paddingTotal = getPaddingTotal(row);
-    let reigns = row.childNodes;
-
-    for (var i = 0; i < position.holders.length; i++) {
-        reign = reigns[i];
-        widthDecimal = (position.holders[i][2] - position.holders[i][1]) / stretch;
-        widthString = "calc((100% - " + (marginTotal + paddingTotal) + "px) * (" + widthDecimal * 100 + " / 100.0))";
-        reign.style.width = widthString;
+        if (i == 0) {
+            reign.style.marginLeft = ((position.holders[i].start - start) / maxStretch) * 100 + "%";
+        }
+        reign.style.width = (position.holders[i].getLength() / maxStretch) * 100 + "%";
     }
 }
 
-function initGraph (positions) {
+function initGraph (graph) {
+    let positions = graph.positions;
     let graphParent = document.createElement("DIV");
     graphParent.classList.add("SNgraphParent");
     $("body")[0].appendChild(graphParent);
+    let start = graph.getEarliestStart();
+    let end = graph.getLatestEnd();
+    let maxStretch = end - start;
     for (var i = 0; i < positions.length; i++) {
-        initRow(positions[i], graphParent);
+        initRow(positions[i], graphParent, start, end, maxStretch);
     }
 }
 
-initGraph([pos1, pos2, pos3]);
+//initGraph(g);

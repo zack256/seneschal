@@ -2,8 +2,10 @@
     padding : 2em;
     font-family: Arial, Helvetica, sans-serif;
 }
-.SNreign {
+.SNholder {
     display: inline-block;
+    /**
     margin: 0.25em;
     padding: 0.5em;
+    **/
 }
