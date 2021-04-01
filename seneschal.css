@@ -4,8 +4,15 @@
 }
 .SNholder {
     display: inline-block;
+    white-space: nowrap;
+    /** margin-bottom: 0.25em; **/
+    height : 1em;
     /**
     margin: 0.25em;
     padding: 0.5em;
     **/
+}
+
+.SNholder:hover {
+    background-color: green !important;
 }

@@ -51,22 +51,39 @@ function getPaddingTotal (row) {
     return paddingTotal;
 }
 
+function setToolTipLeft (element) {
+    let toolTip = element.childNodes[0];
+    let elementWidth = $(element).width();
+    let toolTipWidth = $(toolTip).width();
+    let toolTipPadding = parseFloat($(toolTip).css("paddingLeft")) + parseFloat($(toolTip).css("paddingRight"));
+    toolTipWidth += toolTipPadding;
+    let percent = (toolTipWidth / elementWidth) * 100;
+    let leftPercent = 50 - (percent / 2);
+    let string = leftPercent + "%";
+    toolTip.style.left = string;
+}
+
 function initRow (position, graphParent, start, end, maxStretch) {
     let row = document.createElement("DIV");
     row.classList.add("SNrow");
     graphParent.appendChild(row);
-    var reign;
+    var reign, toolTip;
     for (var i = 0; i < position.holders.length; i++) {
         reign = document.createElement("DIV");
         reign.classList.add("SNholder");
+        toolTip = document.createElement("SPAN");
+        toolTip.classList.add("SNtoolTip");
+        toolTip.innerHTML = position.holders[i].name;
+        reign.appendChild(toolTip);
         row.appendChild(reign);
         reign.style.backgroundColor = position.color;
-        reign.innerHTML = position.holders[i].name;
+        //reign.innerHTML = position.holders[i].name;
 
         if (i == 0) {
             reign.style.marginLeft = ((position.holders[i].start - start) / maxStretch) * 100 + "%";
         }
         reign.style.width = (position.holders[i].getLength() / maxStretch) * 100 + "%";
+        setToolTipLeft(reign, toolTip);
     }
 }
 
@@ -82,5 +99,3 @@ function initGraph (graph) {
         initRow(positions[i], graphParent, start, end, maxStretch);
     }
 }
-
-//initGraph(g);
