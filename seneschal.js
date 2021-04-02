@@ -28,10 +28,11 @@ class Position {
 }
 
 class Holder {
-    constructor (name, start, end) {
+    constructor (name, start, end, colors) {
         this.name = name;
         this.start = start;
         this.end = end;
+        this.colors = colors;
     }
     getLength () {
         return this.end - this.start;
@@ -63,11 +64,11 @@ function setToolTipLeft (element) {
     toolTip.style.left = string;
 }
 
-function initRow (position, graphParent, start, end, maxStretch) {
+function initRow (position, graphParent, start, end, maxStretch, colorDict, styleElement) {
     let row = document.createElement("DIV");
     row.classList.add("SNrow");
     graphParent.appendChild(row);
-    var reign, toolTip;
+    var reign, toolTip, hoverColor, cssText;
     for (var i = 0; i < position.holders.length; i++) {
         reign = document.createElement("DIV");
         reign.classList.add("SNholder");
@@ -76,8 +77,16 @@ function initRow (position, graphParent, start, end, maxStretch) {
         toolTip.innerHTML = position.holders[i].name;
         reign.appendChild(toolTip);
         row.appendChild(reign);
-        reign.style.backgroundColor = position.color;
-        //reign.innerHTML = position.holders[i].name;
+        reign.style.backgroundColor = position.holders[i].colors[0];
+        
+        hoverColor = position.holders[i].colors[1];
+        if (!colorDict.hasOwnProperty(hoverColor)) {
+            colorDict[hoverColor] = colorDict["len"];
+            colorDict["len"]++;
+            cssText = ".SNhoverColor" + colorDict[hoverColor] + ":hover { background-color : " + hoverColor + " !important; }";
+            styleElement.appendChild(document.createTextNode(cssText));
+        }
+        reign.classList.add("SNhoverColor" + colorDict[hoverColor]);
 
         if (i == 0) {
             reign.style.marginLeft = ((position.holders[i].start - start) / maxStretch) * 100 + "%";
@@ -88,6 +97,9 @@ function initRow (position, graphParent, start, end, maxStretch) {
 }
 
 function initGraph (graph) {
+    styleElement = document.createElement("STYLE");
+    styleElement.classList.add("SNstyleElement");
+    $("body")[0].appendChild(styleElement);
     let positions = graph.positions;
     let graphParent = document.createElement("DIV");
     graphParent.classList.add("SNgraphParent");
@@ -95,7 +107,8 @@ function initGraph (graph) {
     let start = graph.getEarliestStart();
     let end = graph.getLatestEnd();
     let maxStretch = end - start;
+    var colorDict = {"len" : 0};
     for (var i = 0; i < positions.length; i++) {
-        initRow(positions[i], graphParent, start, end, maxStretch);
+        initRow(positions[i], graphParent, start, end, maxStretch, colorDict, styleElement);
     }
 }
